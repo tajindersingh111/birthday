@@ -17,6 +17,18 @@ export function LockScreen({ onUnlock, birthdayDate }: LockScreenProps) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [stage, setStage] = useState<"countdown" | "greetings" | "passcode">("countdown");
   const [shake, setShake] = useState(false);
+  const [bgHearts, setBgHearts] = useState<{ id: number; left: number; size: number; delay: number; duration: number }[]>([]);
+
+  useEffect(() => {
+    const hearts = Array.from({ length: 15 }).map((_, i) => ({
+      id: i,
+      left: Math.random() * 90 + 5,
+      size: Math.random() * 14 + 12, // 12px to 26px
+      delay: Math.random() * 8,
+      duration: Math.random() * 6 + 7, // 7s to 13s
+    }));
+    setBgHearts(hearts);
+  }, []);
 
   // Countdown timer logic
   useEffect(() => {
@@ -89,6 +101,31 @@ export function LockScreen({ onUnlock, birthdayDate }: LockScreenProps) {
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-pink-900/10 rounded-full blur-[100px]"></div>
         <div className="absolute top-[10%] left-[10%] w-[250px] h-[250px] bg-purple-900/5 rounded-full blur-[80px]"></div>
+      </div>
+
+      {/* Floating background hearts */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {bgHearts.map((heart) => (
+          <motion.div
+            key={heart.id}
+            initial={{ y: "110vh", x: `${heart.left}vw`, opacity: 0 }}
+            animate={{
+              y: "-10vh",
+              opacity: [0, 0.4, 0.4, 0],
+              scale: [0.6, 1, 1, 0.8],
+            }}
+            transition={{
+              duration: heart.duration,
+              delay: heart.delay,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute text-pink-500/20 select-none pointer-events-none"
+            style={{ fontSize: heart.size }}
+          >
+            ❤️
+          </motion.div>
+        ))}
       </div>
 
       <div className="z-10 w-full max-w-lg flex flex-col items-center text-center">
