@@ -48,7 +48,7 @@ export default function Home() {
   // Initialize background music loop
   useEffect(() => {
     soundRef.current = new Howl({
-      src: ["/audio/jordan-sandhu-birthday-full-song-jassi-x-bunty-bains-latest-punjabi-songs_Mmli3gSV.mp3"],
+      src: ["/audio/do-gallan.mp3"],
       html5: true,
       loop: true,
       volume: 0, // start muted for fade-in
@@ -67,7 +67,21 @@ export default function Home() {
       },
     });
 
+    // Autoplay upon first screen click/tap (e.g. anywhere on countdown lock screen)
+    const handleAutoplay = () => {
+      if (soundRef.current && !soundRef.current.playing()) {
+        soundRef.current.play();
+      }
+      window.removeEventListener("click", handleAutoplay);
+      window.removeEventListener("touchstart", handleAutoplay);
+    };
+
+    window.addEventListener("click", handleAutoplay);
+    window.addEventListener("touchstart", handleAutoplay);
+
     return () => {
+      window.removeEventListener("click", handleAutoplay);
+      window.removeEventListener("touchstart", handleAutoplay);
       if (soundRef.current) {
         soundRef.current.unload();
       }
@@ -76,8 +90,15 @@ export default function Home() {
 
   const handleUnlock = () => {
     setIsUnlocked(true);
-    if (soundRef.current && !soundRef.current.playing()) {
-      soundRef.current.play();
+    if (soundRef.current) {
+      soundRef.current.seek(0); // Restart song from the beginning!
+      if (!soundRef.current.playing()) {
+        soundRef.current.play();
+      } else {
+        // Reset volume and fade it in smoothly for a transition effect
+        soundRef.current.volume(0);
+        soundRef.current.fade(0, 0.4, 1500);
+      }
     }
     // Launch a welcome rainfall of hearts!
     setTimeout(() => {
