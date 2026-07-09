@@ -42,7 +42,7 @@ export const birthdayConfig: BirthdayConfig = {
   name: "Tajji",
   nickname: "Beautiful Girl",
   birthdayAge: 22,
-  birthdayDate: "July 9",
+  birthdayDate: "2026-07-09T00:00:00",
   relationshipStartDate: "2023-10-20T00:00:00",
   letterText: [
     "Dear Manu,",

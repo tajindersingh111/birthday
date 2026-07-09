@@ -8,6 +8,7 @@ import { Howl } from "howler";
 import { birthdayConfig } from "@/config/birthday";
 import { useEasterEggs } from "@/hooks/useEasterEggs";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import { LockScreen } from "@/components/LockScreen";
 import { HeartCanvas, HeartCanvasRef } from "@/components/HeartCanvas";
 
 // Import Sections
@@ -24,6 +25,9 @@ import { Surprise } from "@/sections/Surprise";
 export default function Home() {
   const heartCanvasRef = useRef<HeartCanvasRef>(null);
   
+  // Gatekeeping lock state
+  const [isUnlocked, setIsUnlocked] = useState(false);
+
   // Custom cursor position state for desktop cursor-glow
   const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
   const [showCursor, setShowCursor] = useState(false);
@@ -62,26 +66,23 @@ export default function Home() {
       },
     });
 
-    // Try autoplay upon first screen tap/click
-    const handleAutoplay = () => {
-      if (soundRef.current && !soundRef.current.playing()) {
-        soundRef.current.play();
-      }
-      window.removeEventListener("click", handleAutoplay);
-      window.removeEventListener("touchstart", handleAutoplay);
-    };
-
-    window.addEventListener("click", handleAutoplay);
-    window.addEventListener("touchstart", handleAutoplay);
-
     return () => {
-      window.removeEventListener("click", handleAutoplay);
-      window.removeEventListener("touchstart", handleAutoplay);
       if (soundRef.current) {
         soundRef.current.unload();
       }
     };
   }, []);
+
+  const handleUnlock = () => {
+    setIsUnlocked(true);
+    if (soundRef.current && !soundRef.current.playing()) {
+      soundRef.current.play();
+    }
+    // Launch a welcome rainfall of hearts!
+    setTimeout(() => {
+      heartCanvasRef.current?.triggerHeartRain();
+    }, 600);
+  };
 
   const handleTogglePlay = () => {
     if (!soundRef.current || !isAudioLoaded) return;
@@ -151,7 +152,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative min-h-screen w-full bg-black text-white overflow-x-hidden selection:bg-pink-500/30 selection:text-pink-300">
+    <main className={`relative min-h-screen w-full bg-black text-white selection:bg-pink-500/30 selection:text-pink-300 ${isUnlocked ? "overflow-x-hidden" : "h-screen overflow-hidden"}`}>
       
       {/* 1. Desktop Cursor Glow Effect */}
       {showCursor && (
@@ -306,6 +307,23 @@ export default function Home() {
             >
               <X size={16} />
             </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 6. Lock Gate Screen overlay */}
+      <AnimatePresence>
+        {!isUnlocked && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="fixed inset-0 z-[9999]"
+          >
+            <LockScreen
+              birthdayDate={birthdayConfig.birthdayDate}
+              onUnlock={handleUnlock}
+            />
           </motion.div>
         )}
       </AnimatePresence>
