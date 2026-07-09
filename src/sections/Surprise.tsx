@@ -229,6 +229,24 @@ export function Surprise({
 
           {/* Final Message Panel */}
           <div className="z-10 max-w-2xl mx-auto flex flex-col items-center gap-8 mt-16">
+            {/* Glowing Circular Couple Photo */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+              className="relative w-44 h-44 sm:w-52 sm:h-52 rounded-full overflow-hidden border-4 border-pink-500/30 p-1 bg-black/40 backdrop-blur-md shadow-[0_0_35px_rgba(244,63,94,0.4)] select-none z-10"
+            >
+              <div className="relative w-full h-full rounded-full overflow-hidden">
+                <Image
+                  src="/photos/WhatsApp Image 2026-07-09 at 4.46.01 PM (1).jpeg"
+                  alt="Our Forever Memory"
+                  fill
+                  priority
+                  className="object-cover"
+                />
+              </div>
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
