@@ -23,7 +23,9 @@ interface FloatingText {
 
 const MESSAGES = [
   "Tajji loves you! ❤️",
-  "My Handsome Boy 👑",
+  "My Princess 👑",
+  "My Sardarni 🌸",
+  "My Putt 💖",
   "Always Yours 💍",
   "My World 🌎",
   "My Smile 😊",
