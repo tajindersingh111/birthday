@@ -10,6 +10,7 @@ import { useEasterEggs } from "@/hooks/useEasterEggs";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { LockScreen } from "@/components/LockScreen";
 import { HeartCanvas, HeartCanvasRef } from "@/components/HeartCanvas";
+import { FloatingBalloons } from "@/components/FloatingBalloons";
 
 // Import Sections
 import { Hero } from "@/sections/Hero";
@@ -167,6 +168,9 @@ export default function Home() {
 
       {/* 2. Interactive Floating Heart & Particle Canvas */}
       <HeartCanvas ref={heartCanvasRef} density={20} />
+
+      {/* 2.5 Floating Balloon Popping Layer */}
+      {isUnlocked && <FloatingBalloons />}
 
       {/* 3. Shared Ambient Romantic Music Player */}
       <AudioPlayer

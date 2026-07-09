@@ -40,7 +40,7 @@ export interface BirthdayConfig {
 
 export const birthdayConfig: BirthdayConfig = {
   name: "Tajji",
-  nickname: "Beautiful Girl",
+  nickname: "My Princess",
   birthdayAge: 22,
   birthdayDate: "2026-07-10T00:00:00",
   relationshipStartDate: "2023-10-20T00:00:00",
