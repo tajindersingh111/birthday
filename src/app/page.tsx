@@ -1,65 +1,315 @@
-import Image from "next/image";
+"use client";
+
+import { useRef, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, X } from "lucide-react";
+import { Howl } from "howler";
+
+import { birthdayConfig } from "@/config/birthday";
+import { useEasterEggs } from "@/hooks/useEasterEggs";
+import { AudioPlayer } from "@/components/AudioPlayer";
+import { HeartCanvas, HeartCanvasRef } from "@/components/HeartCanvas";
+
+// Import Sections
+import { Hero } from "@/sections/Hero";
+import { Letter } from "@/sections/Letter";
+import { Timeline } from "@/sections/Timeline";
+import { Gallery } from "@/sections/Gallery";
+import { Reasons } from "@/sections/Reasons";
+import { Counter } from "@/sections/Counter";
+import { BucketList } from "@/sections/BucketList";
+import { Music } from "@/sections/Music";
+import { Surprise } from "@/sections/Surprise";
 
 export default function Home() {
+  const heartCanvasRef = useRef<HeartCanvasRef>(null);
+  
+  // Custom cursor position state for desktop cursor-glow
+  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
+  const [showCursor, setShowCursor] = useState(false);
+
+  // Easter egg toast notification state
+  const [easterEggNotification, setEasterEggNotification] = useState<{
+    id: string;
+    type: string;
+    message: string;
+  } | null>(null);
+
+  // Unified audio states
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isAudioLoaded, setIsAudioLoaded] = useState(false);
+  const soundRef = useRef<Howl | null>(null);
+
+  // Initialize background music loop
+  useEffect(() => {
+    soundRef.current = new Howl({
+      src: ["/audio/jordan-sandhu-birthday-full-song-jassi-x-bunty-bains-latest-punjabi-songs_Mmli3gSV.mp3"],
+      html5: true,
+      loop: true,
+      volume: 0, // start muted for fade-in
+      onload: () => {
+        setIsAudioLoaded(true);
+      },
+      onplay: () => {
+        setIsPlaying(true);
+        soundRef.current?.fade(0, 0.4, 2000);
+      },
+      onpause: () => {
+        setIsPlaying(false);
+      },
+      onstop: () => {
+        setIsPlaying(false);
+      },
+    });
+
+    // Try autoplay upon first screen tap/click
+    const handleAutoplay = () => {
+      if (soundRef.current && !soundRef.current.playing()) {
+        soundRef.current.play();
+      }
+      window.removeEventListener("click", handleAutoplay);
+      window.removeEventListener("touchstart", handleAutoplay);
+    };
+
+    window.addEventListener("click", handleAutoplay);
+    window.addEventListener("touchstart", handleAutoplay);
+
+    return () => {
+      window.removeEventListener("click", handleAutoplay);
+      window.removeEventListener("touchstart", handleAutoplay);
+      if (soundRef.current) {
+        soundRef.current.unload();
+      }
+    };
+  }, []);
+
+  const handleTogglePlay = () => {
+    if (!soundRef.current || !isAudioLoaded) return;
+
+    if (soundRef.current.playing()) {
+      soundRef.current.fade(soundRef.current.volume(), 0, 800);
+      setTimeout(() => {
+        soundRef.current?.pause();
+      }, 800);
+    } else {
+      soundRef.current.play();
+    }
+  };
+
+  // Mousemove handler for the pointer glow
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+      if (!showCursor) setShowCursor(true);
+    };
+
+    const handleMouseLeave = () => {
+      setShowCursor(false);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    document.body.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      document.body.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [showCursor]);
+
+  // Handler for custom easter egg triggers
+  const handleTriggerEasterEgg = (type: string, message: string) => {
+    setEasterEggNotification({
+      id: Math.random().toString(),
+      type,
+      message,
+    });
+
+    if (type === "konami" || type === "shake") {
+      heartCanvasRef.current?.triggerHeartRain();
+    }
+  };
+
+  // Setup Easter egg event hooks
+  const { handleHeartClick, photoLongPressProps } = useEasterEggs(handleTriggerEasterEgg);
+
+  // Auto-dismiss easter egg notifications after 5 seconds
+  useEffect(() => {
+    if (easterEggNotification) {
+      const timer = setTimeout(() => {
+        setEasterEggNotification(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [easterEggNotification]);
+
+  // Smooth scroll helper
+  const handleOpenMyHeart = () => {
+    const letterSection = document.getElementById("love-letter");
+    if (letterSection) {
+      letterSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="relative min-h-screen w-full bg-black text-white overflow-x-hidden selection:bg-pink-500/30 selection:text-pink-300">
+      
+      {/* 1. Desktop Cursor Glow Effect */}
+      {showCursor && (
+        <div
+          className="cursor-glow hidden md:block"
+          style={{
+            left: `${mousePos.x}px`,
+            top: `${mousePos.y}px`,
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+      )}
+
+      {/* 2. Interactive Floating Heart & Particle Canvas */}
+      <HeartCanvas ref={heartCanvasRef} density={20} />
+
+      {/* 3. Shared Ambient Romantic Music Player */}
+      <AudioPlayer
+        isPlaying={isPlaying}
+        isLoaded={isAudioLoaded}
+        onToggle={handleTogglePlay}
+      />
+
+      {/* 4. Cinematic Background Animated Auroras & Stars */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none">
+        {/* Top-Right Pink Orb */}
+        <motion.div
+          animate={{
+            x: [0, 80, -40, 0],
+            y: [0, -60, 40, 0],
+            scale: [1, 1.2, 0.9, 1],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-gradient-to-br from-pink-600/10 to-transparent blur-[120px]"
+        />
+
+        {/* Middle-Left Purple/Rose Orb */}
+        <motion.div
+          animate={{
+            x: [0, -100, 50, 0],
+            y: [0, 80, -60, 0],
+            scale: [1, 0.9, 1.15, 1],
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute top-[30%] left-[-15%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-tr from-rose-900/10 to-transparent blur-[140px]"
+        />
+
+        {/* Bottom-Right Deep Red Orb */}
+        <motion.div
+          animate={{
+            x: [0, 60, -80, 0],
+            y: [0, -40, 80, 0],
+            scale: [1, 1.1, 0.95, 1],
+          }}
+          transition={{
+            duration: 28,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="absolute bottom-[-10%] right-[-15%] w-[55vw] h-[55vw] rounded-full bg-gradient-to-br from-pink-900/10 to-transparent blur-[130px]"
+        />
+
+        {/* Subtle Twinkling Star Backdrop */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(244,63,94,0.03)_0%,transparent_80%)]"></div>
+      </div>
+
+      {/* 5. Main content components */}
+      <div className="relative z-10 w-full">
+        {/* Hero Section (Includes loading screen) */}
+        <Hero
+          onOpenHeart={handleOpenMyHeart}
+          nickname={birthdayConfig.nickname}
+          age={birthdayConfig.birthdayAge}
+        />
+
+        {/* Love Letter Section */}
+        <div onClick={handleHeartClick}>
+          <Letter paragraphs={birthdayConfig.letterText} />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* Relationship Timeline */}
+        <Timeline events={birthdayConfig.timelineEvents} />
+
+        {/* Photo Gallery (Supports long-press triggers) */}
+        <Gallery
+          photos={birthdayConfig.galleryPhotos}
+          photoLongPressProps={photoLongPressProps}
+        />
+
+        {/* Reasons I Love You Cards */}
+        <Reasons reasons={birthdayConfig.reasons} />
+
+
+
+        {/* Relationship Live Memory Counter */}
+        <Counter startDateString={birthdayConfig.relationshipStartDate} />
+
+        {/* Future Bucket Checklist */}
+        <BucketList initialItems={birthdayConfig.bucketList} />
+
+        {/* Soundtrack Section (Now synced to global mp3 track and Spotify iframe is removed) */}
+        <Music
+          isPlaying={isPlaying}
+          isLoaded={isAudioLoaded}
+          onToggle={handleTogglePlay}
+        />
+
+        {/* Surprise button Climax & Final Screen */}
+        <Surprise
+          youtubeVideoUrl={birthdayConfig.youtubeEmbedUrl}
+          callNumber={birthdayConfig.callNumber}
+          nickname={birthdayConfig.nickname}
+          triggerHeartRain={() => heartCanvasRef.current?.triggerHeartRain()}
+        />
+      </div>
+
+      {/* 5. Custom Easter Egg Toast Notification Overlay */}
+      <AnimatePresence>
+        {easterEggNotification && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-24 left-6 right-6 sm:left-auto sm:right-6 sm:max-w-md z-[9999] glass-panel border border-pink-500/40 p-5 rounded-2xl shadow-[0_10px_40px_rgba(244,63,94,0.3)] bg-zinc-950/90 backdrop-blur-lg flex gap-4 items-start"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            {/* Achievement Icon */}
+            <div className="p-2 rounded-xl bg-pink-500/10 text-pink-500 flex items-center justify-center shrink-0 animate-pulse">
+              <Sparkles size={20} />
+            </div>
+
+            {/* Achievement text */}
+            <div className="flex-1 min-w-0">
+              <h5 className="font-semibold text-xs tracking-wider uppercase text-pink-400 font-['Poppins']">
+                Secret Easter Egg Found!
+              </h5>
+              <p className="text-sm text-gray-200 mt-1 font-['Poppins'] leading-relaxed">
+                {easterEggNotification.message}
+              </p>
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={() => setEasterEggNotification(null)}
+              className="p-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </main>
   );
 }
