@@ -115,8 +115,7 @@ export function LockScreen({ onUnlock, birthdayDate }: LockScreenProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.5 }}
-              onClick={() => setStage("greetings")}
-              className="mb-8 cursor-pointer active:scale-[0.98] transition-transform duration-200"
+              className="mb-8"
             >
               <h1 className="font-['Playfair_Display',serif] text-3xl sm:text-4xl font-bold text-white mb-2">
                 Waiting for Your Special Day
