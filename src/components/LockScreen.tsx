@@ -111,7 +111,7 @@ export function LockScreen({ onUnlock, birthdayDate }: LockScreenProps) {
             initial={{ y: "110vh", x: `${heart.left}vw`, opacity: 0 }}
             animate={{
               y: "-10vh",
-              opacity: [0, 0.4, 0.4, 0],
+              opacity: [0, 0.8, 0.8, 0],
               scale: [0.6, 1, 1, 0.8],
             }}
             transition={{
@@ -120,7 +120,7 @@ export function LockScreen({ onUnlock, birthdayDate }: LockScreenProps) {
               repeat: Infinity,
               ease: "linear",
             }}
-            className="absolute text-pink-500/20 select-none pointer-events-none"
+            className="absolute text-pink-500/60 select-none pointer-events-none drop-shadow-[0_0_8px_rgba(236,72,153,0.6)]"
             style={{ fontSize: heart.size }}
           >
             ❤️
